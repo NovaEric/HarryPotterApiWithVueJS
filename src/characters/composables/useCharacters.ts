@@ -1,4 +1,4 @@
-import breakingBadApi from "@/api/breakingBadApi";
+import harryPotterApi from "@/api/harryPotterAPI";
 import { onMounted, ref } from "vue";
 import type { Character } from "../interfaces/character";
 import axios from 'axios';
@@ -18,7 +18,7 @@ export const useCharacters = () => {
         isLoading.value = true;
 
         try {
-            const {data} = await breakingBadApi.get<Character[]>('/characters');
+            const {data} = await harryPotterApi.get<Character[]>('/characters');
             characters.value = data;
             isLoading.value = false;
             

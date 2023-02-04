@@ -10,14 +10,15 @@ const character = toRef(props, 'character');
 const router = useRouter();
 
 const goTo = () => {
-    router.push(`by/${character.value.char_id}`);
+    // router.push(`by/${character.value.char_id}`);
+    router.push(`by/${character.value.name}`);
 }
 
 </script>
 
 <template>
     <div class="character-card" @click="goTo()">
-        <img :src="character.img" :alt="character.name" >
+        <img :src="character.image" :alt="character.name" >
         <h3>{{character.name}}</h3>
     </div>
 </template>
@@ -33,7 +34,8 @@ const goTo = () => {
     cursor: pointer;
 }
 img{
-    width: 150px;
+    width: 250px;
+    height: 350px;
     border-radius: 5px 5px 0px 0px;
     box-shadow: 0px 2px 10px rgba(255, 255, 255, 0.1);
     transition: all .5s;

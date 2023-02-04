@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
-import breakingBadApi from '@/api/breakingBadApi';
+import harryPotterApi from '@/api/harryPotterAPI';
 import CardList from '../components/CardList.vue';
 import type { Character } from '../interfaces/character';
 import characterStore from '@/store/characters.store';
@@ -14,7 +14,7 @@ const getCharactersFromCache = async (): Promise<Character[]> => {
         return characterStore.characters.list;
     }
 
-    const { data } = await breakingBadApi.get<Character[]>('/characters');
+    const { data } = await harryPotterApi.get<Character[]>('/characters');
     return data;
 }
 

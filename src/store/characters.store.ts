@@ -1,4 +1,4 @@
-import breakingBadApi from "@/api/breakingBadApi";
+import harryPotterApi from "@/api/harryPotterAPI";
 import type { Character } from "@/characters/interfaces/character"
 import { reactive } from "vue";
 
@@ -10,9 +10,9 @@ interface Store {
         hasError: boolean;
         errorMessage: string | null;
     },
-    ids: {
+    names: {
         list: {
-            [id: string]: Character;
+            [name: string]: Character;
         };
         isLoading: boolean;
         hasError: boolean;
@@ -27,7 +27,7 @@ interface Store {
     //Methods By Id
     StartLoadingCharacterById: () => void;
     LoadedCharacterById: ( character: Character ) => void;
-    CheckIdInStore: ( id: string ) => boolean;
+    CheckIdInStore: (name: string ) => boolean;
 }
 
 // Initial State
@@ -40,7 +40,7 @@ const characterStore = reactive<Store>({
         hasError: false,
         errorMessage: null
     },
-    ids: {
+    names: {
         list: {},
         isLoading: false,
         hasError: false,
@@ -49,7 +49,7 @@ const characterStore = reactive<Store>({
 
     // Methods
     async StartLoadingCharacters(){
-        const { data } = await breakingBadApi.get<Character[]>('/characters');
+        const { data } = await harryPotterApi.get<Character[]>('/characters');
         this.LoadedCharacters(data); 
     },
     LoadedCharacters(data){
@@ -58,7 +58,8 @@ const characterStore = reactive<Store>({
             return this.FailedToLoadCharacters('Reponse is not an array of characters!');
         }
 
-        data = data.filter(character => ![3, 14, 17, 39].includes(character.char_id));
+        // data = data.filter(character => ![3, 14, 17, 39].includes(character.char_id));
+        data = data.filter(character => character.image !== "" );
         this.characters = {
             list: data,
             count: data.length,
@@ -79,19 +80,19 @@ const characterStore = reactive<Store>({
 
     //Methods By id
     StartLoadingCharacterById(){
-        this.ids = {
-            ...this.ids,
+        this.names = {
+            ...this.names,
             isLoading: true,
             hasError: false,
             errorMessage: null
         }
     },
-    CheckIdInStore(id: string){
-        return !!this.ids.list[id];
+    CheckIdInStore(name: string){
+        return !!this.names.list[name];
     },
     LoadedCharacterById(character: Character){
-        this.ids.isLoading = false,
-        this.ids.list[character.char_id] = character;
+        this.names.isLoading = false,
+        this.names.list[character.name] = character;
     },
 });
 
