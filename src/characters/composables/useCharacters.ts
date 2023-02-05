@@ -1,44 +1,45 @@
-import harryPotterApi from "@/api/harryPotterAPI";
-import { onMounted, ref } from "vue";
+import { ref, computed } from "vue";
+import { useQuery } from "@tanstack/vue-query";
 import type { Character } from "../interfaces/character";
-import axios from 'axios';
+import harryPotterApi from "@/api/harryPotterAPI";
 
-const isLoading = ref<boolean>(true);
 const characters = ref<Character[]>([]);
+const isLoading = ref<boolean>(false);
 const hasError = ref<boolean>(false);
-const errorMessage = ref<string>();
+const errorMessage = ref<string | null>(null);
 
-export const useCharacters = () => {
+const getCharacters = async (): Promise<Character[]> => {
+  if (characters.value.length > 0) {
+    return characters.value;
+  }
 
-    onMounted( async() => { await loadCharacters(); });
-    
-    const loadCharacters = async() => {
+  const { data } = await harryPotterApi.get<Character[]>("/characters");
+  return data;
+};
 
-        if (characters.value.length > 0) return;
-        isLoading.value = true;
+const LoadedCharacters = (data: Character[]) => {
+  hasError.value = false;
+  errorMessage.value = null;
+  characters.value = data.filter(character => character.image !== "" );
+  isLoading.value = false;
+};
 
-        try {
-            const {data} = await harryPotterApi.get<Character[]>('/characters');
-            characters.value = data;
-            isLoading.value = false;
-            
-        } catch (error) {
-            
-            hasError.value = true;
-            isLoading.value = false;
+const useCharacters = () => {
+  const { isLoading } = useQuery(["characters"], getCharacters, {
+    onSuccess: LoadedCharacters,
+  });
+  
+  return {
+    //properties
+    characters,
+    errorMessage,
+    hasError,
+    isLoading,
 
-            if (axios.isAxiosError(error)){
-                return errorMessage.value = error.message;
-            }
+    //Getters
+    count: computed(() => characters.value.length)
+    //Methods
+  };
+};
 
-            errorMessage.value = JSON.stringify(error);
-        }
-    }
-
-    return {
-        characters,
-        isLoading,
-        hasError,
-        errorMessage
-    }
-}
+export default useCharacters;

@@ -1,44 +1,29 @@
-
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import type { Character } from '../interfaces/character';
-import characterStore from '@/store/characters.store';
-import harryPotterApi from '@/api/harryPotterAPI';
-import { useQuery } from '@tanstack/vue-query';
+import { watchEffect } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import useCharacter from '../composables/useCharacter';
 import LoadingSpinner from '@/helpers/LoadingSpinner.vue';
 
 
+const router = useRouter();
 const route = useRoute();
 
 const { id } = route.params as {id: string};
 
-const getCharacterByIdCacheFirst = async ( characterId: string ): Promise<Character> => {
+const { character, hasError, errorMessage, isLoading } = useCharacter(id);
 
-    if (characterStore.CheckIdInStore(characterId)){
-        return characterStore.names.list[characterId];
+watchEffect(() => {
+    if (!isLoading.value && hasError.value ) {
+        router.replace('/characters');
     }
-    // const { data } = await harryPotterApi.get<Character[]>(`/characters/${characterId}`);
-    const { data } = await harryPotterApi.get<Character[]>(`/characters`);
-    return data.filter( c => c.name === id)[0];
-};
-
-const { data: character } = useQuery(
-    [ 'characters', id ],
-    () => getCharacterByIdCacheFirst(id),
-    {
-        onSuccess( character ){
-            characterStore.LoadedCharacterById(character);
-        }
-    }
-);
+});
 
 </script>
 
 <template>
-    <h1 v-if="!character">
-        <LoadingSpinner/>
-    </h1>
-    <div v-else>
+    <LoadingSpinner v-if="isLoading"/> 
+    <h1 v-else-if="hasError">{{ errorMessage }}</h1>   
+    <div v-else-if="character">
         <h1>{{ character.name }}</h1>
         <div class="character-container" >
             <img :src="character.image" :alt="character.name" >

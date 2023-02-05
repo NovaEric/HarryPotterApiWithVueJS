@@ -1,49 +1,29 @@
 <script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query';
-import harryPotterApi from '@/api/harryPotterAPI';
 import CardList from '../components/CardList.vue';
-import type { Character } from '../interfaces/character';
-import characterStore from '@/store/characters.store';
 import LoadingSpinner from '@/helpers/LoadingSpinner.vue';
+import useCharacters from '../composables/useCharacters';
 
 const props = defineProps<{ title: string, visible: boolean, subtitle: string }>();
 
-const getCharactersFromCache = async (): Promise<Character[]> => {
-
-    if (characterStore.characters.count > 0) {
-        return characterStore.characters.list;
-    }
-
-    const { data } = await harryPotterApi.get<Character[]>('/characters');
-    return data;
-}
-
-useQuery(
-    ['characters'],
-    getCharactersFromCache,
-    {
-        onSuccess(data) {
-            characterStore.LoadedCharacters(data);
-        }
-    }
-);
+const { isLoading, hasError, errorMessage, characters, count } = useCharacters();
 
 </script>
 
-<template>
-    <h1 v-if="characterStore.characters.isLoading">
-        <LoadingSpinner/>
-    </h1> 
-    <div v-else-if="characterStore.characters.hasError">
+<template>        
+    <LoadingSpinner v-if="isLoading" />
+    <div v-else-if="hasError">
         <h1>Error tying to load data!</h1>
-        <p>{{ characterStore.characters.errorMessage }}</p>
+        <p>{{ errorMessage }}</p>
     </div>
     <template v-else>
-        <h2>{{ props.subtitle }}</h2>
-        <CardList :characters="characterStore.characters.list" />
-    </template>
+        <h2>{{ props.subtitle }} | {{ count }}</h2>
+        <CardList :characters="characters" />
+    </template>    
 </template>
 
 <style scoped>
-
+div, h1, h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
 </style>
